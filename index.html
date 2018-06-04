@@ -1,0 +1,352 @@
+<html lang=en>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+  <div id="readme" class="readme blob instapaper_body">
+    <article class="markdown-body entry-content" itemprop="text"><h1><a id="user-content-logux-core-" class="anchor" aria-hidden="true" href="#logux-core-"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logux Core <a href="http://cultofmartians.com/done.html" rel="nofollow"><img src="https://camo.githubusercontent.com/03dac7833b3d619c60d72d6a2006e47ddc5c0c07/687474703a2f2f63756c746f666d61727469616e732e636f6d2f6173736574732f6261646765732f62616467652e737667" alt="Cult Of Martians" data-canonical-src="http://cultofmartians.com/assets/badges/badge.svg" style="max-width:100%;"></a></h1>
+<p><a target="_blank" href="https://camo.githubusercontent.com/891f84fc606f9d7fcd7fab30eed507e0e0e4131a/68747470733a2f2f63646e2e7261776769742e636f6d2f6c6f6775782f6c6f6775782f6d61737465722f6c6f676f2e737667"><img align="right" width="95" height="95" title="Logux logo" src="https://camo.githubusercontent.com/891f84fc606f9d7fcd7fab30eed507e0e0e4131a/68747470733a2f2f63646e2e7261776769742e636f6d2f6c6f6775782f6c6f6775782f6d61737465722f6c6f676f2e737667" data-canonical-src="https://cdn.rawgit.com/logux/logux/master/logo.svg" style="max-width:100%;"></a></p>
+<p>Log for Logux and test tools for log.</p>
+<p>Logux idea is based on shared logs. Log is a list of actions ordered in time.
+Every entry in Logux log contains action object and meta object with:</p>
+<ul>
+<li><code>id</code>: unique action ID to have same actions order on every machine.</li>
+<li><code>time</code>: action creation time. Could be different on different machines,
+because could contain calculated time different between client and server.</li>
+<li><code>added</code>: sequence number when action was insert to current log.
+It is used to find actions since last synchronization.</li>
+</ul>
+<p>In most use cases, you don’t need to create log, high-level Logux tools
+will do it for you. But you will have access to log API from that tools.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">isFirstOlder</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>logux-core/is-first-older<span class="pl-pds">'</span></span>
+
+<span class="pl-k">let</span> lastRename
+<span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>add<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">switch</span> (<span class="pl-smi">action</span>.<span class="pl-c1">type</span>) {
+
+    <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">'</span>RENAME<span class="pl-pds">'</span></span>:
+      <span class="pl-c"><span class="pl-c">//</span> Simple last-writer-wins</span>
+      <span class="pl-k">if</span> (<span class="pl-en">isFirstOlder</span>(lastRename, meta)) {
+        <span class="pl-en">changeName</span>(<span class="pl-smi">action</span>.<span class="pl-c1">name</span>)
+        lastRename <span class="pl-k">=</span> meta
+      }
+      <span class="pl-k">break</span>
+
+  }
+})
+
+<span class="pl-smi">rename</span>.<span class="pl-c1">addEventListener</span>(<span class="pl-s"><span class="pl-pds">'</span>click<span class="pl-pds">'</span></span>, () <span class="pl-k">=&gt;</span> {
+  <span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>rename<span class="pl-pds">'</span></span>, name<span class="pl-k">:</span> <span class="pl-smi">name</span>.<span class="pl-c1">value</span> })
+})</pre></div>
+<p>Logux is in early beta, however we use it in production
+for our <a href="https://amplifr.com" rel="nofollow">SaaS social media scheduling platform, Amplifr</a>.</p>
+<a href="https://evilmartians.com/?utm_source=logux-core" rel="nofollow">
+  <img src="https://camo.githubusercontent.com/608ad776fcb2da2b33f4f8265889cc5f1b8a6bad/68747470733a2f2f6576696c6d61727469616e732e636f6d2f6261646765732f73706f6e736f7265642d62792d6576696c2d6d61727469616e732e737667" alt="Sponsored by Evil Martians" width="236" height="54" data-canonical-src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" style="max-width:100%;">
+</a>
+<h2><a id="user-content-basic-concepts" class="anchor" aria-hidden="true" href="#basic-concepts"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basic Concepts</h2>
+<h3><a id="user-content-action" class="anchor" aria-hidden="true" href="#action"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Action</h3>
+<p>Logux action is a simple JS object, having only one mandatory <code>type</code> property.
+Logux actions are very similar to Redux actions.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>RENAME<span class="pl-pds">'</span></span>, name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>New<span class="pl-pds">'</span></span> })</pre></div>
+<p>Actions from third-party libraries must prefix <code>type</code> with library name
+and <code>/</code> separator. For example, <code>example</code> library should use actions types
+like <code>example/name</code>.</p>
+<h3><a id="user-content-metadata" class="anchor" aria-hidden="true" href="#metadata"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Metadata</h3>
+<p>Action metadata is an open structure. It has only 3 mandatory properties:
+<code>id</code>, <code>time</code>, <code>added</code>.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  meta <span class="pl-c"><span class="pl-c">//</span>=&gt; { id: [1473564435318, 'server', 0], time: 1473564435318, added: 1 }</span>
+})</pre></div>
+<p>You could add own properties. Just add project name project with <code>/</code> separator.
+For example, <code>example</code> library should use meta like <code>example/name</code>.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }, { <span class="pl-s"><span class="pl-pds">'</span>example/foo<span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-c1">1</span> }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  meta[<span class="pl-s"><span class="pl-pds">'</span>example/foo<span class="pl-pds">'</span></span>] <span class="pl-c"><span class="pl-c">//</span>=&gt; 1</span>
+})</pre></div>
+<h3><a id="user-content-action-id" class="anchor" aria-hidden="true" href="#action-id"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Action ID</h3>
+<p>Log order is strictly required to be the same on every machine.
+For this reason, every action metadata contains <code>meta.id</code>
+to order actions by this ID.</p>
+<p>ID is an array of:</p>
+<ol>
+<li>Number of milliseconds elapsed since 1 January 1970.</li>
+<li>Unique node ID.</li>
+<li>An incremented number in case if the previous action
+had the same number of milliseconds.</li>
+</ol>
+<div class="highlight highlight-source-js"><pre>[<span class="pl-c1">1473564435318</span>, <span class="pl-s"><span class="pl-pds">'</span>server<span class="pl-pds">'</span></span>, <span class="pl-c1">0</span>]
+[<span class="pl-c1">1473564435318</span>, <span class="pl-s"><span class="pl-pds">'</span>server<span class="pl-pds">'</span></span>, <span class="pl-c1">1</span>]
+[<span class="pl-c1">1473564435319</span>, <span class="pl-s"><span class="pl-pds">'</span>server<span class="pl-pds">'</span></span>, <span class="pl-c1">0</span>]</pre></div>
+<p>This format is tricky to keep ID unique on every machine.</p>
+<h3><a id="user-content-time" class="anchor" aria-hidden="true" href="#time"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Time</h3>
+<p>Action creation time could be found in <code>meta.time</code>
+in milliseconds elapsed since 1 January 1970.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">time</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Date</span>(<span class="pl-smi">meta</span>.<span class="pl-smi">time</span>)
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>Last edit was at <span class="pl-pds">'</span></span> <span class="pl-k">+</span> <span class="pl-smi">time</span>.<span class="pl-c1">toString</span>())</pre></div>
+<p>Some machines could have wrong time or time zone. To fix it most
+of Logux clients detect time difference between client and server time.</p>
+<p>Several actions could be created in same milliseconds, so you should not
+use <code>meta.time</code> to find older action. Use special
+<code>isFirstOlder(meta1, meta2)</code> helper.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">if</span> (<span class="pl-en">isFirstOlder</span>(lastChange, meta)) {
+  <span class="pl-en">update</span>(action)
+  lastChange <span class="pl-k">=</span> meta
+}</pre></div>
+<p><code>meta.time</code> uses this time difference between client and server. So it contains
+time according local system time. As a result, <code>meta.time</code> could be different
+on different machines.</p>
+<p><code>meta.id</code> uses time in first position, but it doesn’t use time difference
+between client as server. So <code>meta.id</code> is same on every machine
+(as expected from ID).</p>
+<h3><a id="user-content-added-number" class="anchor" aria-hidden="true" href="#added-number"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Added Number</h3>
+<p>Action metadata has <code>added</code> with sequence number. Every next action added
+to current log will get bigger <code>added</code> number.</p>
+<p>After synchronization actions from other log could have lower <code>id</code>,
+because they was created before synchronization. But <code>added</code> shows only when
+action was added to this log, not when they was created.</p>
+<p>As result actions in synchronized logs will have the same <code>id</code>, but different
+<code>added</code> metadata.</p>
+<p>This time is used to find, which actions should be sent when two
+nodes are connected again.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-smi">meta</span>.<span class="pl-smi">added</span>) <span class="pl-c"><span class="pl-c">//</span>=&gt; 1</span>
+})
+<span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }, { id<span class="pl-k">:</span> old, time<span class="pl-k">:</span> past }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-smi">meta</span>.<span class="pl-smi">added</span>) <span class="pl-c"><span class="pl-c">//</span>=&gt; 2</span>
+})</pre></div>
+<h3><a id="user-content-reasons" class="anchor" aria-hidden="true" href="#reasons"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reasons</h3>
+<p>There is no way to remove actions from log. If you need to revert change,
+you need to add other action on top. But many actions become unnecessary
+after some time (for instance, overrode by other actions) and we could
+clean them to reduce log size.</p>
+<p>This is why every action in log should have “reason of life”,
+just string tag added by action creator or by <code>preadd</code> listener.</p>
+<p>If action doesn’t have a reason, it will be emitted to <code>add</code> listeners,
+but will not be saved to store.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>OPEN_MENU<span class="pl-pds">'</span></span> })
+<span class="pl-c"><span class="pl-c">//</span> Event listeners was emitted with OPEN_MENU</span>
+<span class="pl-en">logSize</span>(log) <span class="pl-c"><span class="pl-c">//</span>=&gt; 0</span>
+
+<span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOR_SERVER<span class="pl-pds">'</span></span> }, { reasons<span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">'</span>sync<span class="pl-pds">'</span></span>] })
+<span class="pl-c"><span class="pl-c">//</span> Event listeners was emitted with FOR_SERVER and it will saved to log</span>
+<span class="pl-en">logSize</span>(log) <span class="pl-c"><span class="pl-c">//</span>=&gt; 1</span></pre></div>
+<p>When actions become unnecessary, you could remove specific reason
+from all actions. Logux will remove all actions, which lost all reasons.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-en">logSize</span>(log) <span class="pl-c"><span class="pl-c">//</span>=&gt; 1</span>
+
+<span class="pl-smi">log</span>.<span class="pl-en">removeReason</span>(<span class="pl-s"><span class="pl-pds">'</span>sync<span class="pl-pds">'</span></span>)
+<span class="pl-en">logSize</span>(log) <span class="pl-c"><span class="pl-c">//</span>=&gt; 0</span></pre></div>
+<p>If you need to keep only last value, there is a shortcut for it:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>(action, { keepLast<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>app/lastName<span class="pl-pds">'</span></span> })</pre></div>
+<p>It will be equal to:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>(action, { reasons<span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">'</span>app/lastName<span class="pl-pds">'</span></span>] }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  <span class="pl-smi">log</span>.<span class="pl-en">removeReason</span>(<span class="pl-s"><span class="pl-pds">'</span>app/lastName<span class="pl-pds">'</span></span>, { maxAdded<span class="pl-k">:</span> <span class="pl-smi">meta</span>.<span class="pl-smi">added</span> <span class="pl-k">-</span> <span class="pl-c1">1</span> })
+})</pre></div>
+<h2><a id="user-content-methods" class="anchor" aria-hidden="true" href="#methods"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h2>
+<h3><a id="user-content-adding" class="anchor" aria-hidden="true" href="#adding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding</h3>
+<p>Method <code>add</code> will generate metadata for new event, add event to log store
+and execute all <code>add</code> event listeners:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  <span class="pl-c"><span class="pl-c">//</span> Event was saved to store and all listener executed</span>
+  meta <span class="pl-c"><span class="pl-c">//</span>=&gt; { id: [1473564435318, 'server', 0], time: 1473564435318, added: 1 }</span>
+})</pre></div>
+<p>Action ID will be generated synchronously, so you can create events
+in parallel:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-c1">Promise</span>.<span class="pl-c1">all</span>([
+  <span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }),
+  <span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>BAR<span class="pl-pds">'</span></span> })
+]).<span class="pl-c1">then</span>(([<span class="pl-smi">fooMeta</span>, <span class="pl-smi">barMeta</span>]) <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">isFirstOlder</span>(fooMeta, barMeta) <span class="pl-c"><span class="pl-c">//</span> always true</span>
+})</pre></div>
+<p>You can pass action metadata as second argument. Metadata is an open structure.
+You can set any values there, just use project name prefix:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> }, { <span class="pl-s"><span class="pl-pds">'</span>example/foo<span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-c1">1</span> }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  meta[<span class="pl-s"><span class="pl-pds">'</span>example/foo<span class="pl-pds">'</span></span>] <span class="pl-c"><span class="pl-c">//</span>=&gt; 1</span>
+})</pre></div>
+<p>In custom synchronization tool you can set action ID manually.
+Log will not generate them.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>(syncedAction, { id, time }).<span class="pl-c1">then</span>(<span class="pl-smi">meta</span> <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">if</span> (<span class="pl-k">!</span>meta) <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>Action was already in log<span class="pl-pds">'</span></span>)
+})</pre></div>
+<p>If you set ID manually, log could contains action with same ID.
+In this case log will ignore new action and pass <code>false</code> to Promise.</p>
+<h3><a id="user-content-reading" class="anchor" aria-hidden="true" href="#reading"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reading</h3>
+<p>There are two ways to read actions from the log.
+First, one can subscribe to new actions:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>add<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(action, meta)
+})
+<span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>TEST<span class="pl-pds">'</span></span> })
+<span class="pl-c"><span class="pl-c">//</span> Prints { type: 'TEST' }, { id: […], time: 1473564435318, added: 1 }</span></pre></div>
+<p>Log implements <a href="https://github.com/ai/nanoevents">nanoevents</a> API, so if you want to unbind the listener,
+just call the function returned by <code>on</code>.</p>
+<p>The second way is to run asynchronous action iterator:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">each</span>((<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-c"><span class="pl-c">//</span> for every action</span>
+}).<span class="pl-c1">then</span>(() <span class="pl-k">=&gt;</span> {
+  <span class="pl-c"><span class="pl-c">//</span> when iteration process all everts or iterator stop iteration</span>
+})</pre></div>
+<p>An iterator can return <code>false</code> in order to stop the iteration process:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">each</span>((<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">if</span> (<span class="pl-en">isFirstOlder</span>(meta, lastVisit)) {
+    <span class="pl-k">return</span> <span class="pl-c1">false</span>;
+  } <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-smi">action</span>.<span class="pl-c1">type</span> <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>RENAME<span class="pl-pds">'</span></span>) {
+    <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>User was renamed since last visit<span class="pl-pds">'</span></span>)
+    <span class="pl-k">return</span> <span class="pl-c1">false</span>;
+  }
+})</pre></div>
+<p>By default, <code>each()</code> orders actions by their creation time.
+You could specify custom ordering, e.g. by the adding time:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">each</span>({ order<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>added<span class="pl-pds">'</span></span> }, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">if</span> (<span class="pl-smi">meta</span>.<span class="pl-smi">added</span> <span class="pl-k">&gt;</span> lastSync) {
+    <span class="pl-en">sendToServer</span>(action, meta)
+  } <span class="pl-k">else</span> {
+    <span class="pl-k">return</span> <span class="pl-c1">false</span>
+  }
+})</pre></div>
+<h3><a id="user-content-comparing" class="anchor" aria-hidden="true" href="#comparing"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Comparing</h3>
+<p><code>isFirstOlder()</code> uses <code>meta.time</code> and <code>meta.id</code> to compare action creation
+time even if they was created in same milliseconds.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">isFirstOlder</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>logux-core/is-first-older<span class="pl-pds">'</span></span>
+
+<span class="pl-en">isFirstOlder</span>(meta1, meta2) <span class="pl-c"><span class="pl-c">//</span>=&gt; false</span>
+<span class="pl-en">isFirstOlder</span>(meta2, meta1) <span class="pl-c"><span class="pl-c">//</span>=&gt; true</span></pre></div>
+<p>If one of metadata will be <code>undefined</code>, this method will work with it
+as it was created in the beginning of the time.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-en">isFirstOlder</span>(anyMeta, <span class="pl-c1">undefined</span>) <span class="pl-c"><span class="pl-c">//</span>=&gt; true</span></pre></div>
+<p>So you could use it with defined variable without value:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">let</span> lastWrite
+<span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>add<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">if</span> (<span class="pl-en">isFirstOlder</span>(meta, lastWrite)) {
+    <span class="pl-en">write</span>(action)
+    lastWrite <span class="pl-k">=</span> meta
+  }
+})</pre></div>
+<h3><a id="user-content-cleaning" class="anchor" aria-hidden="true" href="#cleaning"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Cleaning</h3>
+<p>Logux use “reasons of life” to clean log from unnecessary actions
+(for instance, overrode by other actions).</p>
+<p>Without a <code>reasons</code> in metadata action will not even be saved to store.
+But reason-less action still will be emitted in <code>add</code> event.
+So if you need to save action for a while (for instance, to synchronize
+it with server), you need to set reason.</p>
+<p>First way, is to set in <code>add</code> method:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>CHANGE_NAME<span class="pl-pds">'</span></span> }, { reasons<span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">'</span>sync<span class="pl-pds">'</span></span>] })</pre></div>
+<p>Or by <code>preadd</code> listener. Note, that event is emitted before ID check,
+so it is emitted even for actions, that was already in log.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>preadd<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-smi">meta</span>.<span class="pl-smi">reasons</span>.<span class="pl-c1">push</span>(<span class="pl-s"><span class="pl-pds">'</span>devtools<span class="pl-pds">'</span></span>)
+})</pre></div>
+<p>When you don’t need some actions anymore, you can remove your reason:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">sync</span>.<span class="pl-en">waitFor</span>(<span class="pl-s"><span class="pl-pds">'</span>synchronized<span class="pl-pds">'</span></span>).<span class="pl-c1">then</span>(() <span class="pl-k">=&gt;</span> {
+  <span class="pl-smi">log</span>.<span class="pl-en">removeReason</span>(<span class="pl-s"><span class="pl-pds">'</span>sync<span class="pl-pds">'</span></span>)
+})</pre></div>
+<p>Also you can limit actions by <code>minAdded</code> and/or <code>maxAdded</code>:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-c"><span class="pl-c">//</span> Keep last 1000 actions</span>
+<span class="pl-smi">log</span>.<span class="pl-en">removeReason</span>(<span class="pl-s"><span class="pl-pds">'</span>devtools<span class="pl-pds">'</span></span>, { maxAdded<span class="pl-k">:</span> lastAdded <span class="pl-k">-</span> <span class="pl-c1">1000</span> })</pre></div>
+<p>Action will be in log when it has at least one reason. When all reasons
+will be removed, action will be cleaned from log.</p>
+<p>Log will emit <code>clean</code> event on cleaning any action.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>clean<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>Action was cleaned: <span class="pl-pds">'</span></span>, action, <span class="pl-smi">meta</span>.<span class="pl-c1">id</span>)
+})</pre></div>
+<h3><a id="user-content-testing" class="anchor" aria-hidden="true" href="#testing"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Testing</h3>
+<p>Real logs use real time in actions ID, so log content will be different
+on every test execution.</p>
+<p>To fix it Logux has special logs for tests with simple sequence timer.
+Also log already has node ID and uses in-memory store.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">TestTime</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>logux-core/test-time<span class="pl-pds">'</span></span>
+
+<span class="pl-en">it</span>(<span class="pl-s"><span class="pl-pds">'</span>tests log<span class="pl-pds">'</span></span>, () <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">const</span> <span class="pl-c1">log</span> <span class="pl-k">=</span> <span class="pl-smi">TestTime</span>.<span class="pl-en">getLog</span>()
+  <span class="pl-smi">log</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>TEST<span class="pl-pds">'</span></span> })
+  <span class="pl-en">lastId</span>(log) <span class="pl-c"><span class="pl-c">//</span>=&gt; [1, 'test1', 0]</span>
+})</pre></div>
+<p>When you test several logs in one test (for example, synchronization test),
+you expect that action added on next code line will have bigger ID:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log1</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>FOO<span class="pl-pds">'</span></span> })
+<span class="pl-smi">log2</span>.<span class="pl-c1">add</span>({ type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>BAR<span class="pl-pds">'</span></span> })
+<span class="pl-en">isFirstOlder</span>(<span class="pl-en">lastMeta</span>(log1), <span class="pl-en">lastMeta</span>(log2))</pre></div>
+<p>To do it, both logs should know about each other. You must create they
+by same test time instance for it.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">time</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">TestTime</span>()
+<span class="pl-k">const</span> <span class="pl-c1">log1</span> <span class="pl-k">=</span> <span class="pl-smi">time</span>.<span class="pl-en">nextLog</span>()
+<span class="pl-k">const</span> <span class="pl-c1">log2</span> <span class="pl-k">=</span> <span class="pl-smi">time</span>.<span class="pl-en">nextLog</span>()</pre></div>
+<h2><a id="user-content-events" class="anchor" aria-hidden="true" href="#events"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Events</h2>
+<p>All events doesn’t support asynchronous listeners. If you need asynchronous
+calls inside listeners, you should care about calling order by your own.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">let</span> prevTask <span class="pl-k">=</span> <span class="pl-c1">Promise</span>.<span class="pl-c1">resolve</span>()
+<span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>add<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  prevTask <span class="pl-k">=</span> <span class="pl-smi">prevTask</span>.<span class="pl-c1">then</span>(() <span class="pl-k">=&gt;</span> {
+    <span class="pl-k">return</span> <span class="pl-en">processAsync</span>(action, meta)
+  })
+})</pre></div>
+<h3><a id="user-content-preadd" class="anchor" aria-hidden="true" href="#preadd"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>preadd</code></h3>
+<p>Event is emitted with added action, before it will be placed to store.
+It is the best place to automatically set <code>reasons</code> (for example, to keep
+last 1000 action in log for DevTools).</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>preadd<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-smi">meta</span>.<span class="pl-smi">reasons</span>.<span class="pl-c1">push</span>(<span class="pl-s"><span class="pl-pds">'</span>devtools<span class="pl-pds">'</span></span>)
+})</pre></div>
+<p>Instead of <code>add</code> event, <code>preadd</code> event will be emitted even if action
+with same ID already presented in store.</p>
+<h3><a id="user-content-add" class="anchor" aria-hidden="true" href="#add"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>add</code></h3>
+<p>Event is emitted on any new action added to log.</p>
+<p>It will emitted for reason-less action and for actions without a <code>reasons</code>.
+If action have reasons to put it to store, event will be emitted
+after store saved a event and <code>meta</code> will contain <code>added</code> property.</p>
+<p>It will not be emitted only if action with same <code>meta.id</code> is already presented
+in store.</p>
+<p>It is the best place for action listeners to change application store according
+new actions.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">let</span> lastChange
+<span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>action<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">if</span> (<span class="pl-smi">action</span>.<span class="pl-c1">type</span> <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>CHANGE_NAME<span class="pl-pds">'</span></span> <span class="pl-k">&amp;&amp;</span> <span class="pl-en">isFirstOlder</span>(lastChange, meta)) {
+    lastChange <span class="pl-k">=</span> meta
+    <span class="pl-smi">user</span>.<span class="pl-c1">name</span> <span class="pl-k">=</span> <span class="pl-smi">action</span>.<span class="pl-c1">name</span>
+  }
+})</pre></div>
+<p>Note, that action could be passed in different order, rather that was created.
+Action <code>B</code> created after action <code>A</code>, could be emitted before <code>A</code>.</p>
+<p>To prevent problems, always check action created time by <code>isFirstOlder()</code>
+and look into a log for more younger action.</p>
+<h3><a id="user-content-clean" class="anchor" aria-hidden="true" href="#clean"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>clean</code></h3>
+<p>Event is emitted when action was cleaned from log, or when reason-less
+action was added to log, but didn’t saved to store, because of empty <code>reasons</code>.</p>
+<p>It is the best place to warn developers about cleaning process.</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">log</span>.<span class="pl-en">on</span>(<span class="pl-s"><span class="pl-pds">'</span>clean<span class="pl-pds">'</span></span>, (<span class="pl-smi">action</span>, <span class="pl-smi">meta</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>Action was cleaned: <span class="pl-pds">'</span></span>, action, <span class="pl-smi">meta</span>.<span class="pl-c1">id</span>)
+})</pre></div>
+<h2><a id="user-content-stores" class="anchor" aria-hidden="true" href="#stores"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Stores</h2>
+<p>Log should be saved to <code>localStorage</code> in browser or a file on server.
+The server log can grow very big, exceeding the available memory.
+This is why Logux has changeable log stores.</p>
+<h3><a id="user-content-memorystore" class="anchor" aria-hidden="true" href="#memorystore"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>MemoryStore</h3>
+<p>This package contains simple in-memory store designed primarily for tests:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">MemoryStore</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>logux-core<span class="pl-pds">'</span></span>
+<span class="pl-k">const</span> <span class="pl-c1">log</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Log</span>({ nodeId<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>server<span class="pl-pds">'</span></span>, store<span class="pl-k">:</span> <span class="pl-k">new</span> <span class="pl-en">MemoryStore</span>() })</pre></div>
+<p>Think about this store as a basic store realization.</p>
+<h3><a id="user-content-custom-store" class="anchor" aria-hidden="true" href="#custom-store"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Custom Store</h3>
+<p>Any object implementing this 5 methods can be considered a Store:</p>
+<ul>
+<li><code>add(entry)</code> puts new log entry in the store. Returns a Promise with new
+action meta or <code>false</code> if action with same <code>id</code> was already in log.</li>
+<li><code>has(id)</code> does store has action with this ID.</li>
+<li><code>remove(id)</code> removes action.</li>
+<li><code>get()</code> returns a Promise loading the first page of actions in the log.
+Action page is an object containing an entries array in <code>page.entries</code>
+and a <code>page.next</code> function returning the next page Promise.
+Last page should not contain the <code>page.next</code> method.</li>
+<li><code>changeMeta(id, diff)</code> changes keys in action’s metadata.</li>
+<li><code>removeReason(reason, criteria, callback)</code> removes <code>reason</code> from action’s
+metadata and remove actions without reasons.</li>
+<li><code>getLastAdded()</code> returns Promise with biggest <code>added</code> in store.</li>
+<li><code>getLastSynced()</code> returns Promise with <code>added</code> values for latest synchronized
+received/sent actions.</li>
+<li><code>setLastSynced(values)</code> saves <code>added</code> values for latest synchronized
+received/sent actions and return Promise when they will be saved to store.</li>
+</ul>
+</article>
+  </div>
+
+  </div>
+  </body>
+</html>
